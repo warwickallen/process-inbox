@@ -1,43 +1,62 @@
-log = (msg) -> console.log msg
 notification_text = 'IMPORTANT MAIL NOTIFICATION'
 notified = []   # Remember which threads we have alreadly sent notification messages for.
-
-wait = -> Utilities.sleep 250; Utilities.sleep 250 while (new Date()).getSeconds() % 10; true
 __ = labels = {}
-getLabel = (name) -> labels[name] ?= wait() and GmailApp.getUserLabelByName(name) ? throw "Label '#{name}' doesn't exist"
-address = -> __[address] ?= Session.getActiveUser().getEmail()
-sendMail = (subject, body) -> wait() and MailApp.sendEmail address(), subject, body
 t_id = null
 
+log = (msg) ->
+  console.log msg
 
-# Actions
+wait = ->
+  Utilities.sleep 250
+  Utilities.sleep 250 while (new Date()).getSeconds() % 10
+  true
+
+getLabel = (name) ->
+  labels[name] ?= wait() and GmailApp.getUserLabelByName(name) ? throw "Label '#{name}' doesn't exist"
+
+address = ->
+  __[address] ?= Session.getActiveUser().getEmail()
+
+sendMail = (subject, body) ->
+  wait() and MailApp.sendEmail address(), subject, body
+
+
+### Actions ###
+
 addLabel = (t, label_name) ->
   log t_id + "adding label '#{label_name}'"
   getLabel(label_name).addToThread t
+
 remLabel = (t, label_name) ->
   log t_id + "removing label '#{label_name}'"
   getLabel(label_name).removeFromThread t
+
 notify = (t) ->
   return if notified.some (n) -> n is t  # Only notify once for each round.
   notified.push t
   log t_id + 'notifying'
   sendMail notification_text + ' ' + t.getLastMessageDate(), t.getFirstMessageSubject() + t_id
   addLabel t, 'notification/notified'
+
 archiveOldNotification = (t) ->
   thread = wait() and GmailApp.getThreadById t.getMessages()[0].getPlainBody().match(/\[([0-9a-f]{16})\]/)[1]
   unless thread.isInInbox() && thread.isUnread() && thread.getLabels().some((label) -> label is 'notification/yes')
     log t_id + "archiving notification for [#{thread.getId()}] " + thread.getFirstMessageSubject()
     t.moveToArchive()
+
 archive = (t) ->
   log t_id + 'archiving'
   t.moveToArchive()
 
 
-# Filters
+### Filters ###
+
 olderThan = (period) ->
   throw "Unrecognised period '#{period}'" unless match = /(\d+)min/.exec(period)
   (t) -> t.getLastMessageDate() < new Date(new Date() - 6e4*match[1])
 
+
+### The Worker ###
 
 processMail = (rules) ->
   log "PROCESS MAIL [#$SHA#]"
@@ -55,7 +74,12 @@ processMail = (rules) ->
           rule.action(thread)
   null
 
-processHighPriorityRules = -> log 'High Priority'; processMail [
+
+### Entry Points ###
+
+processHighPriorityRules = ->
+  log 'High Priority'
+  processMail [
     {
       query:  "in:(notification/yes)  subject:\"#{notification_text}\""
       action: (t) -> remLabel t, 'notification/yes'
@@ -82,7 +106,9 @@ processHighPriorityRules = -> log 'High Priority'; processMail [
     }
   ]
 
-processLowPriorityRules = -> log 'Low Priority'; processMail [
+processLowPriorityRules = ->
+  log 'Low Priority'
+  processMail [
     {
       query:  "in:(inbox) subject:\"#{notification_text}\""
       filter: olderThan '2min'
