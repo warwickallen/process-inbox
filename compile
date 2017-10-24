@@ -1,0 +1,30 @@
+#!/usr/bin/perl -w
+
+use strict;
+
+sub slurp { undef local $/; open IN, $_[0] or die $!; local $_ = <IN>; close IN; $_ }
+
+my %file = map {$_ => 'ProcessInbox.'.$_} qw/coffee js gs/;
+my %substitution = ( SHA => do {my $__; $__ = `sha1sum $file{coffee}` =~ /\w+/p && $& unless defined $__; $__} );
+
+system $_ for split /\n/, <<SHELL;
+    chmod 0644 $file{js} $file{gs}
+    coffee -cb $file{coffee}
+SHELL
+
+open GS, '>', $file{gs} or die $!;
+print GS '/* ', $file{coffee}, " [$substitution{SHA}]\n", slurp($file{coffee}), "*/\n\n";
+open JS, '<', $file{js} or die $!;
+my (@js, %var);
+while (<JS>) {
+    /^var(?: (\w+)(?{ $var{$^N} = 1 })[,;])+/ and next;
+    s/^(\w+) = function/function $1/ and delete $var{$1};
+    s/#\$(\w*)#/$substitution{$1}/ge;
+    push @js, $_;
+}
+close JS;
+print GS shift(@js), %var ? 'var '.join(', ', keys %var) : "", ";\n", @js;
+
+system <<SHELL;
+    chmod 0444 $file{js} $file{gs}
+SHELL
