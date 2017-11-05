@@ -159,8 +159,8 @@ processHighPriorityRules = function() {
         return remLabel(t, 'notification/maybe');
       }
     }, {
-      query: 'in:(inbox unread notification/yes)',
-      filter: olderThan('10min'),
+      query: "in:(inbox unread notification/yes) -subject:\"" + notification_text + "\"",
+      filter: olderThan('6min'),
       action: notify
     }
   ]);
