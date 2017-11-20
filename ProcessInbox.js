@@ -189,6 +189,9 @@ processLowPriorityRules = function() {
       filter: olderThan('20min'),
       action: archive
     }, {
+      query: 'in:(inbox  auckland-council)         older_than:1h',
+      action: archive
+    }, {
       query: 'in:(inbox  promotions)               older_than:4h',
       action: archive
     }, {
