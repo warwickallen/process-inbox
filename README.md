@@ -14,3 +14,5 @@
 1. Convert the Coffee Script to a Google Script file by running `./compile` then paste the Google Script file into a Google Apps Script project.
 
 1. Create triggers for the `processHighPriorityRules` and `processLowPriorityRules` functions.
+
+1. On your phone's Gmail app, set the notification rules for the label "Notifications/yes".
