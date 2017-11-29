@@ -11,6 +11,6 @@
 
 1. Edit the rules in the Coffee Script file to suit your needs.
 
-1. Convert the Coffee Script to a Google Script file by running `./convert` then paste the Google Script file into a Google Apps Script project.
+1. Convert the Coffee Script to a Google Script file by running `./compile` then paste the Google Script file into a Google Apps Script project.
 
 1. Create triggers for the `processHighPriorityRules` and `processLowPriorityRules` functions.
