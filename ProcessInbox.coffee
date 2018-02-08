@@ -55,6 +55,21 @@ olderThan = (period) ->
   throw "Unrecognised period '#{period}'" unless match = /(\d+)min/.exec(period)
   (t) -> t.getLastMessageDate() < new Date(new Date() - 6e4*match[1])
 
+currentTimeBetween = (start_time, end_time) ->
+  setHours = (date, time) ->
+    unless (match = /(\d?\d):(\d\d)(?::(\d\d))?/.exec(time))?
+      throw "'#{time}' should be in the format 'hh:mm' or 'hh:mm:ss'"
+    date.setHours match[1], match[2] ? 0, match[3] ? 0, 0
+  () ->
+    now = new Date()
+    start = new Date now
+    setHours start, start_time
+    end = new Date now
+    setHours end, end_time
+    retval = if end > start then now >= start and now <= end else now >= start or now <= end
+    log "#{now} is #{if retval then "" else "not "}in the range (#{start}, #{end})."
+    retval
+
 
 ### The Worker ###
 
@@ -101,7 +116,7 @@ processHighPriorityRules = ->
       action: (t) -> remLabel t, 'notification/maybe'
     }, {
       query:  "in:(inbox unread notification/yes) -subject:\"#{notification_text}\""
-      filter: olderThan '6min'
+      filter: (t) -> currentTimeBetween('6:00', '22:00')() and olderThan('6min')(t)
       action: notify
     }
   ]

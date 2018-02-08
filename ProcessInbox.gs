@@ -1,4 +1,4 @@
-/* ProcessInbox.coffee [0dc4ac01b92aa99f98d4b1985681afc5e87dd7eb] 2018-02-08 21:45:49
+/* ProcessInbox.coffee [d3d13dd08f603988f776a303b2a953f16d9aa603] 2018-02-08 22:39:04
 notification_text = 'IMPORTANT MAIL NOTIFICATION'
 notified = []   # Remember which threads we have alreadly sent notification messages for.
 __ = labels = {}
@@ -56,6 +56,21 @@ olderThan = (period) ->
   throw "Unrecognised period '#{period}'" unless match = /(\d+)min/.exec(period)
   (t) -> t.getLastMessageDate() < new Date(new Date() - 6e4*match[1])
 
+currentTimeBetween = (start_time, end_time) ->
+  setHours = (date, time) ->
+    unless (match = /(\d?\d):(\d\d)(?::(\d\d))?/.exec(time))?
+      throw "'#{time}' should be in the format 'hh:mm' or 'hh:mm:ss'"
+    date.setHours match[1], match[2] ? 0, match[3] ? 0, 0
+  () ->
+    now = new Date()
+    start = new Date now
+    setHours start, start_time
+    end = new Date now
+    setHours end, end_time
+    retval = if end > start then now >= start and now <= end else now >= start or now <= end
+    log "#{now} is #{if retval then "" else "not "}in the range (#{start}, #{end})."
+    retval
+
 
 ### The Worker ###
 
@@ -102,7 +117,7 @@ processHighPriorityRules = ->
       action: (t) -> remLabel t, 'notification/maybe'
     }, {
       query:  "in:(inbox unread notification/yes) -subject:\"#{notification_text}\""
-      filter: olderThan '6min'
+      filter: (t) -> currentTimeBetween('6:00', '22:00')() and olderThan('6min')(t)
       action: notify
     }
   ]
@@ -268,12 +283,34 @@ function olderThan(period) {
   };
 };
 
+function currentTimeBetween(start_time, end_time) {
+  var setHours;
+  setHours = function(date, time) {
+    var match, ref, ref1;
+    if ((match = /(\d?\d):(\d\d)(?::(\d\d))?/.exec(time)) == null) {
+      throw "'" + time + "' should be in the format 'hh:mm' or 'hh:mm:ss'";
+    }
+    return date.setHours(match[1], (ref = match[2]) != null ? ref : 0, (ref1 = match[3]) != null ? ref1 : 0, 0);
+  };
+  return function() {
+    var end, now, retval, start;
+    now = new Date();
+    start = new Date(now);
+    setHours(start, start_time);
+    end = new Date(now);
+    setHours(end, end_time);
+    retval = end > start ? now >= start && now <= end : now >= start || now <= end;
+    log(now + " is " + (retval ? "" : "not ") + "in the range (" + start + ", " + end + ").");
+    return retval;
+  };
+};
+
 
 /* The Worker */
 
 function processMail(rules) {
   var i, j, k, len, len1, rule, thread, threads;
-  log("PROCESS MAIL [0dc4ac01b92aa99f98d4b1985681afc5e87dd7eb] 2018-02-08 21:45:49");
+  log("PROCESS MAIL [d3d13dd08f603988f776a303b2a953f16d9aa603] 2018-02-08 22:39:04");
   for (j = 0, len = rules.length; j < len; j++) {
     rule = rules[j];
     log(rule.query);
@@ -334,7 +371,9 @@ function processHighPriorityRules() {
       }
     }, {
       query: "in:(inbox unread notification/yes) -subject:\"" + notification_text + "\"",
-      filter: olderThan('6min'),
+      filter: function(t) {
+        return currentTimeBetween('6:00', '22:00')() && olderThan('6min')(t);
+      },
       action: notify
     }
   ]);
