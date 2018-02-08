@@ -99,7 +99,7 @@ olderThan = function(period) {
 
 processMail = function(rules) {
   var i, j, k, len, len1, rule, thread, threads;
-  log("PROCESS MAIL [#$SHA#]");
+  log("PROCESS MAIL [#$SHA#] #$COMPILE_TIME#");
   for (j = 0, len = rules.length; j < len; j++) {
     rule = rules[j];
     log(rule.query);

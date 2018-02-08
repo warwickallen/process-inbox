@@ -59,7 +59,7 @@ olderThan = (period) ->
 ### The Worker ###
 
 processMail = (rules) ->
-  log "PROCESS MAIL [#$SHA#]"
+  log "PROCESS MAIL [#$SHA#] #$COMPILE_TIME#"
   for rule in rules
     log rule.query
     i = 0

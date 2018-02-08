@@ -3,9 +3,13 @@
 use strict;
 
 sub slurp { undef local $/; open IN, $_[0] or die $!; local $_ = <IN>; close IN; $_ }
+sub timestamp { my @t = localtime $_[0]; sprintf '%d-%02d-%02d %02d:%02d:%02d', 1900 + $t[5], 1 + $t[4], @t[3,2,1,0] }
 
 my %file = map {$_ => 'ProcessInbox.'.$_} qw/coffee js gs/;
-my %substitution = ( SHA => do {my $__; $__ = `sha1sum $file{coffee}` =~ /\w+/p && $& unless defined $__; $__} );
+my %substitution = (
+  SHA           => do {my $__; $__ = `sha1sum $file{coffee}` =~ /\w+/p && $& unless defined $__; $__},
+  COMPILE_TIME  => timestamp time,
+);
 
 system $_ for split /\n/, <<SHELL;
     chmod 0644 $file{js} $file{gs}
@@ -13,7 +17,7 @@ system $_ for split /\n/, <<SHELL;
 SHELL
 
 open GS, '>', $file{gs} or die $!;
-print GS '/* ', $file{coffee}, " [$substitution{SHA}]\n", slurp($file{coffee}), "*/\n\n";
+print GS '/* ', $file{coffee}, " [$substitution{SHA}] $substitution{COMPILE_TIME}\n", slurp($file{coffee}), "*/\n\n";
 open JS, '<', $file{js} or die $!;
 my (@js, %var);
 while (<JS>) {
