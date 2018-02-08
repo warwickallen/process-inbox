@@ -156,11 +156,17 @@ processHighPriorityRules = function() {
       }
     }, {
       query: 'in:(inbox unread notification/yes) older_than:3h',
+      filter: function(t) {
+        return currentTimeBetween('9:00', '22:00')();
+      },
       action: function(t) {
         return addLabel(t, 'notification/expired');
       }
     }, {
       query: 'in:(notification/yes)  older_than:3h',
+      filter: function(t) {
+        return currentTimeBetween('9:00', '22:00')();
+      },
       action: function(t) {
         return remLabel(t, 'notification/yes');
       }
@@ -183,7 +189,7 @@ processHighPriorityRules = function() {
     }, {
       query: "in:(inbox unread notification/yes) -subject:\"" + notification_text + "\"",
       filter: function(t) {
-        return currentTimeBetween('6:00', '22:00')() && olderThan('6min')(t);
+        return currentTimeBetween('6:00', '22:00')() && olderThan('3min')(t);
       },
       action: notify
     }

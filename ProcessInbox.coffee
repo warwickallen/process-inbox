@@ -100,9 +100,11 @@ processHighPriorityRules = ->
       action: (t) -> remLabel t, 'notification/yes'
     }, {
       query:  'in:(inbox unread notification/yes) older_than:3h'
+      filter: (t) -> currentTimeBetween('9:00', '22:00')()  # Don't expire old messages outside of the notification time.
       action: (t) -> addLabel t, 'notification/expired'
     }, {
       query:  'in:(notification/yes)  older_than:3h'
+      filter: (t) -> currentTimeBetween('9:00', '22:00')()  # Don't expire old messages outside of the notification time.
       action: (t) -> remLabel t, 'notification/yes'
     }, {
       query:  'in:(notification/maybe  development)'
@@ -116,7 +118,7 @@ processHighPriorityRules = ->
       action: (t) -> remLabel t, 'notification/maybe'
     }, {
       query:  "in:(inbox unread notification/yes) -subject:\"#{notification_text}\""
-      filter: (t) -> currentTimeBetween('6:00', '22:00')() and olderThan('6min')(t)
+      filter: (t) -> currentTimeBetween('6:00', '22:00')() and olderThan('3min')(t)
       action: notify
     }
   ]
