@@ -192,6 +192,12 @@ processHighPriorityRules = function() {
         return currentTimeBetween('6:00', '22:00')() && olderThan('3min')(t);
       },
       action: notify
+    }, {
+      query: "in:(inbox unread -notification/yes) from:(australiansuper.com OR australiansuper.net.au)",
+      filter: function(t) {
+        return currentTimeBetween('18:00', '20:00')();
+      },
+      action: notify
     }
   ]);
 };

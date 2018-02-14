@@ -120,6 +120,10 @@ processHighPriorityRules = ->
       query:  "in:(inbox unread notification/yes) -subject:\"#{notification_text}\""
       filter: (t) -> currentTimeBetween('6:00', '22:00')() and olderThan('3min')(t)
       action: notify
+    }, {
+      query:  "in:(inbox unread -notification/yes) from:(australiansuper.com OR australiansuper.net.au)"
+      filter: (t) -> currentTimeBetween('18:00', '20:00')() # On-call for Australian Super between 6 and 8 pm.
+      action: notify
     }
   ]
 
