@@ -193,9 +193,9 @@ processHighPriorityRules = function() {
       },
       action: notify
     }, {
-      query: "in:(inbox unread -notification/yes) from:(australiansuper.com OR australiansuper.net.au)",
+      query: "in:(inbox unread -notification/yes) ( australiansuper.com OR in:(alphacert) ) newer_than:3h",
       filter: function(t) {
-        return currentTimeBetween('18:00', '20:00')();
+        return currentTimeBetween('17:51', '20:01')();
       },
       action: notify
     }
