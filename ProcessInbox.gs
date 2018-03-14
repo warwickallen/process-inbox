@@ -1,4 +1,4 @@
-/* ProcessInbox.coffee [4d5c15875bc53a4e7feef11668f3241b02d82528] 2018-03-14 20:46:05
+/* ProcessInbox.coffee [47aadb07677b00c9329e8bfa7670a7dcb733fe79] 2018-03-14 21:07:36
 notification_text = 'IMPORTANT MAIL NOTIFICATION'
 notified = []   # Remember which threads we have alreadly sent notification messages for.
 __ = labels = {}
@@ -48,6 +48,10 @@ archiveOldNotification = (t) ->
 archive = (t) ->
   log t_id + 'archiving'
   t.moveToArchive()
+
+dispose = (t) ->
+  log t_id + 'disposing'
+  t.moveToTrash()
 
 
 ### Filters ###
@@ -189,6 +193,9 @@ processLowPriorityRules = ->
     }, {
       query:  'in:(inbox  ticket-management)        older_than:48h'
       action: archive
+    }, {
+      query:  'in:(notification/alert)              older_than:7d'
+      action: dispose
     }
   ]
 */
@@ -276,6 +283,11 @@ function archive(t) {
   return t.moveToArchive();
 };
 
+function dispose(t) {
+  log(t_id + 'disposing');
+  return t.moveToTrash();
+};
+
 
 /* Filters */
 
@@ -316,7 +328,7 @@ function currentTimeBetween(start_time, end_time) {
 
 function processMail(rules) {
   var i, j, k, len, len1, rule, thread, threads;
-  log("PROCESS MAIL [4d5c15875bc53a4e7feef11668f3241b02d82528] 2018-03-14 20:46:05");
+  log("PROCESS MAIL [47aadb07677b00c9329e8bfa7670a7dcb733fe79] 2018-03-14 21:07:36");
   for (j = 0, len = rules.length; j < len; j++) {
     rule = rules[j];
     log(rule.query);
@@ -458,6 +470,9 @@ function processLowPriorityRules() {
     }, {
       query: 'in:(inbox  ticket-management)        older_than:48h',
       action: archive
+    }, {
+      query: 'in:(notification/alert)              older_than:7d',
+      action: dispose
     }
   ]);
 };

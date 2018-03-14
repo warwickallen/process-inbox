@@ -48,6 +48,10 @@ archive = (t) ->
   log t_id + 'archiving'
   t.moveToArchive()
 
+dispose = (t) ->
+  log t_id + 'disposing'
+  t.moveToTrash()
+
 
 ### Filters ###
 
@@ -188,5 +192,8 @@ processLowPriorityRules = ->
     }, {
       query:  'in:(inbox  ticket-management)        older_than:48h'
       action: archive
+    }, {
+      query:  'in:(notification/alert)              older_than:7d'
+      action: dispose
     }
   ]
