@@ -74,6 +74,22 @@ currentTimeBetween = (start_time, end_time) ->
     log "#{now} is #{if retval then "" else "not "}in the range (#{start}, #{end})."
     retval
 
+currentDayRange = (start_day, end_day) ->
+  dayNumber = (day) ->
+    day = day.substring(0, 3).toLowerCase()
+    for d, i in ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
+      return i if d is day
+    throw "'#{day}' should be at least the first three letters of a week day name."
+  start_day = dayNumber(start_day)
+  end_day = dayNumber(end_day)
+  () ->
+    today = new Date().getDay()
+    retval = if start_day < end_day then            \
+      today >= start_day && today <= end_day else   \
+      today <= start_day && today >= end_day
+    log "#{today} is #{if retval then "" else "not "}in the range (#{start_day}, #{end_day})."
+    retval
+
 
 ### The Worker ###
 
@@ -126,7 +142,8 @@ processHighPriorityRules = ->
       action: notify
     }, {
       query:  "in:(inbox unread -notification/yes) ( australiansuper.com OR in:(alphacert) ) newer_than:3h"
-      filter: (t) -> currentTimeBetween('17:51', '20:01')() # On-call for Australian Super between 6 and 8 pm.
+      filter: (t) -> currentTimeBetween('17:51', '20:01')() and    # On-call for Australian Super between 6 and 8 pm,
+                     currentDayRange('Monday', 'Friday')()         # only on week days.
       action: notify
     }
   ]
