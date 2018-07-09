@@ -223,7 +223,7 @@ processHighPriorityRules = function() {
       },
       action: notify
     }, {
-      query: "in:(inbox unread -notification/yes) ( australiansuper.com OR in:(alphacert) ) newer_than:3h",
+      query: "in:(inbox unread -notification/yes) ( australiansuper.com OR in:(alphacert) ) newer_than:3h -subject:\"" + notification_text + "\"",
       filter: function(t) {
         return currentTimeBetween('17:51', '20:01')() && currentDayRange('Monday', 'Friday')();
       },

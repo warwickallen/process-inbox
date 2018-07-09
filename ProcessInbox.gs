@@ -142,7 +142,7 @@ processHighPriorityRules = ->
       filter: (t) -> currentTimeBetween('6:00', '22:00')() and olderThan('3min')(t)
       action: notify
     }, {
-      query:  "in:(inbox unread -notification/yes) ( australiansuper.com OR in:(alphacert) ) newer_than:3h"
+      query:  "in:(inbox unread -notification/yes) ( australiansuper.com OR in:(alphacert) ) newer_than:3h -subject:\"#{notification_text}\""
       filter: (t) -> currentTimeBetween('17:51', '20:01')() and    # On-call for Australian Super between 6 and 8 pm,
                      currentDayRange('Monday', 'Friday')()         # only on week days.
       action: notify
@@ -442,7 +442,7 @@ function processHighPriorityRules() {
       },
       action: notify
     }, {
-      query: "in:(inbox unread -notification/yes) ( australiansuper.com OR in:(alphacert) ) newer_than:3h",
+      query: "in:(inbox unread -notification/yes) ( australiansuper.com OR in:(alphacert) ) newer_than:3h -subject:\"" + notification_text + "\"",
       filter: function(t) {
         return currentTimeBetween('17:51', '20:01')() && currentDayRange('Monday', 'Friday')();
       },
